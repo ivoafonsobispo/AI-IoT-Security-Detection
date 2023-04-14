@@ -1,0 +1,15 @@
+-- Performance of Binary SMOTE - DNN ---
+Accuracy : 98.18%
+Precision: 98.17%
+Recall: 100.0%
+F1-score: 99.08%
+Balanced accuracy: 64.83%
+Classification report:
+              precision    recall  f1-score   support
+
+           0       1.00      0.30      0.46      2310
+           1       0.98      1.00      0.99     87228
+
+    accuracy                           0.98     89538
+   macro avg       0.99      0.65      0.72     89538
+weighted avg       0.98      0.98      0.98     89538
