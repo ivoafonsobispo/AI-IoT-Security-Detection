@@ -122,3 +122,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+Datasets/flow-farm_test.csv
+
+Datasets/flow-farm_train_smote.csv
+
+Datasets/flow-farm_train_smotenc.csv
+
+Datasets/flow-farm_train.csv
+
+Datasets/flow-farm.csv
