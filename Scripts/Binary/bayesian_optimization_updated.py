@@ -53,37 +53,43 @@ y_test = le.transform(y_test)
 # Split into training and testing sets
 X_train, X_train_test, y_train, y_train_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
-model = Sequential()
+X_train = X_train.reshape(-1, 158)
+X_train_test = X_train_test.reshape(-1, 158)
+
+def build_model(hp):
+    model = Sequential()
+
+    model.add(Dense(units = hp.Int('dense-bot', min_value=51, max_value=350, step=50), input_shape=(None,158), activation='relu'))
+
+    for i in range(hp.Int('num_dense_layers', 1, 2)):
+        model.add(Dense(units=hp.Int('dense_' + str(i), min_value=50, max_value=100, step=25), activation='relu'))
+        model.add(Dropout(hp.Choice('dropout_'+ str(i), values=[0.0, 0.1, 0.2, 0.3])))
+
+    model.add(Dense(10,activation="softmax"))
+
+    hp_optimizer=hp.Choice('Optimizer', values=['Adam', 'SGD'])
+
+    if hp_optimizer == 'Adam':
+        hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
+    elif hp_optimizer == 'SGD':
+        hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
+        nesterov=True
+        momentum=0.9
+
+    model.compile(optimizer = hp_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 hp = kt.HyperParameters()
 
-model.add(Dense(units = hp.Int('dense-bot', min_value=50, max_value=350, step=50), input_shape=(784,), activation='relu'))
-
-for i in range(hp.Int('num_dense_layers', 1, 2)):
-  model.add(Dense(units=hp.Int('dense_' + str(i), min_value=50, max_value=100, step=25), activation='relu'))
-  model.add(Dropout(hp.Choice('dropout_'+ str(i), values=[0.0, 0.1, 0.2])))
-
-model.add(Dense(10,activation="softmax"))
-
-hp_optimizer=hp.Choice('Optimizer', values=['Adam', 'SGD'])
-
-if hp_optimizer == 'Adam':
-    hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
-elif hp_optimizer == 'SGD':
-    hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
-    nesterov=True
-    momentum=0.9
-
-model.compile(optimizer = hp_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-
 tuner_mlp = kt.tuners.BayesianOptimization(
-    model,
+    build_model,
+    hyperparameters=hp,
     seed=42,
     objective='val_loss',
     max_trials=30,
     directory='.',
-    project_name='dnn-bayesian_article')
-tuner_mlp.search(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_train_test, y_train_test)) # callbacks=callbacks
+    project_name='ddn-binary-bayesian_optimization')
+tuner_mlp.search(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_train_test, y_train_test))
 
 
 best_mlp_hyperparameters = tuner_mlp.get_best_hyperparameters(1)[0]
