@@ -18,30 +18,20 @@ import keras_tuner as kt
 df_train = pd.read_csv("../Datasets/flow-farm_train_smote.csv")
 df_test = pd.read_csv("../Datasets/flow-farm_test.csv")
 
-# Create Binary Classification
-df_train['is_attack'] = df_train['type'].apply(lambda x: 0 if x == "normal" else 1)
-df_train.groupby('is_attack')['is_attack'].count()
-df_test['is_attack'] = df_test['type'].apply(lambda x: 0 if x == "normal" else 1)
-df_test.groupby('is_attack')['is_attack'].count()
-
-# Drop multi-class column
-df_train = df_train.drop(['type'], axis=1)
-df_test = df_test.drop(['type'], axis=1)
-
 # Create Encoder Training
-X_columns = df_train.columns.drop('is_attack')
-X_columns_test = df_test.columns.drop('is_attack')
+X_columns = df_train.columns.drop('type')
+X_columns_test = df_test.columns.drop('type')
 
 # Label Encoding
 le = LabelEncoder()
-le.fit(df_train["is_attack"].values)
-le.fit(df_test["is_attack"].values)
+le.fit(df_train["type"].values)
+le.fit(df_test["type"].values)
 
 X = df_train[X_columns].values
 X_test = df_test[X_columns_test].values
 
-y = df_train["is_attack"].values
-y_test = df_test["is_attack"].values
+y = df_train["type"].values
+y_test = df_test["type"].values
 
 y = le.transform(y)
 y_test = le.transform(y_test)
@@ -57,8 +47,8 @@ def build_model(hp):
     model.add(Dense(units = hp.Int('dense-bot', min_value=10, max_value=256, step=50), input_shape=(158,), activation='relu'))
     for i in range(hp.Int('num_dense_layers', 1, 2)):
         model.add(Dense(units=hp.Int('dense_' + str(i), min_value=10, max_value=256, step=25), activation='relu'))
-        model.add(Dropout(hp.Choice('dropout_'+ str(i), values=[0.0, 0.1, 0.2, 0.3])))
-    model.add(Dense(1,activation="sigmoid"))
+        model.add(Dropout(hp.Choice('dropout_'+ str(i), values=[0.1, 0.2, 0.3])))
+    model.add(Dense(10,activation="softmax"))
     hp_optimizer=hp.Choice('Optimizer', values=['Adam', 'SGD'])
     if hp_optimizer == 'Adam':
         hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
@@ -66,7 +56,7 @@ def build_model(hp):
         hp_learning_rate = hp.Choice('learning_rate', values=[1e-1, 1e-2, 1e-3])
         nesterov=True
         momentum=0.9
-    model.compile(optimizer = hp_optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer = hp_optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model
 
 tuner_mlp = kt.tuners.BayesianOptimization(
