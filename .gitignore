@@ -383,3 +383,5 @@ bayesian/multi-class-dnn-bayesian_optimization/trial_29/checkpoint.index
 bayesian/multi-class-dnn-bayesian_optimization/trial_29/trial.json
 bayesian/multi-class-dnn-bayesian_optimization/tuner0.json
 bayesian/nohup.out
+*.pcap
+*.csv
