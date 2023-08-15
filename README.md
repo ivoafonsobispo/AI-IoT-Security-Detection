@@ -1,6 +1,6 @@
 # IAIoTSecurity - Exploration of artificial intelligence techniques applied to the detection of security incidents in IoT networks.
 
-## Description
+## Abstract
 
 This study focuses on the development of a Machine Learning-based Intrusion Detection System tailored for the Internet of Things with a specific application in Smart Farming. To address the challenge of securing IoT devices in agriculture, we created a realistic scenario to simulate various types of attacks, including Denial of Service and Spoofing. Data from these scenarios were collected, cleaned, and pre-processed to train the selected Machine Learning models. The processed data resulted in the creation of a dataset, which has been made publicly available through the Zenodo platform, contributing to the academic-scientific field.
 
